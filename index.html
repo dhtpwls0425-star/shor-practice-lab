@@ -158,7 +158,7 @@ button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus
                 <label class="advanced-ccx"><input type="checkbox" id="general-ccx-expand"> MCX를 CCX(Toffoli)로 더 분해 <span>· 추가 보조 큐비트 사용</span></label>
                 <div class="advanced-notation">회로가 길어도 분할하지 않습니다. 구간 버튼으로 이동하거나 회로를 좌우로 드래그하세요. MCX와 CCX는 논리 게이트이며, 하드웨어 기본 게이트로는 추가 분해가 필요합니다.</div>
               </div>
-              <div class="circuit-hint"><strong>↔ 하나의 연속된 Quantum Circuit</strong><em id="general-active-stage">01 중첩 준비</em></div>
+              <div class="circuit-hint"><strong>↔ 하나의 연속된 Quantum Circuit</strong><em id="general-active-stage">01 HADAMARD</em></div>
               <div id="general-scroll" class="circuit-scroll advanced-circuit-scroll" tabindex="0" role="region" aria-label="연속된 심화 양자 회로. 좌우 드래그 또는 방향키로 이동"><div id="general-circuit-render" class="circuit-shell advanced-timeline"></div></div>
               <div class="result-card" style="margin-top:16px"><div class="result-card-head"><h4>예상 measurement probability</h4><span id="general-probability-tag">order-finding outcomes</span></div><p class="tiny">실제 제어 모듈러 곱셈과 역 QFT에 대응하는 이상적인 측정 분포입니다.</p><div id="general-probability-render"></div><p id="general-probability-description" class="small-caption"></p></div>
             </div>
@@ -624,10 +624,10 @@ function compileAdvancedTimeline(model){
   const total=model.count+model.width+(generalExpandCCX?model.ancillas:0);
   const last=Array(total).fill(0),pitch=74,left=190,gap=120,sections=[];
   const kinds=[
-    {name:'01 중첩 준비',stages:model.stages.filter(s=>s.key==='init')},
-    {name:'02 Controlled Modular',stages:model.stages.filter(s=>s.key.startsWith('mul-'))},
-    {name:'03 Inverse QFT',stages:model.stages.filter(s=>s.key==='qft')},
-    {name:'04 Measure',stages:model.stages.filter(s=>s.key==='measure')}
+    {name:'01 HADAMARD',stages:model.stages.filter(s=>s.key==='init')},
+    {name:'02 CONTROLLED MODULAR',stages:model.stages.filter(s=>s.key.startsWith('mul-'))},
+    {name:'03 INVERSE QFT',stages:model.stages.filter(s=>s.key==='qft')},
+    {name:'04 MEASURE',stages:model.stages.filter(s=>s.key==='measure')}
   ];
   const gates=[];let finishedDepth=0;
   const operands=g=>g.type==='H'||g.type==='X'||g.type==='MEASURE'?[g.q]:g.type==='MCX'||g.type==='CCX'?[...g.controls,g.target]:g.type==='CX'?[g.a,g.target]:[g.a,g.b];
@@ -674,10 +674,21 @@ function drawAdvancedWindow(){
   s+=`<rect x="${x0}" y="${ys[0]-24}" width="${vw}" height="${ys[diagram.count-1]-ys[0]+48}" fill="#eef4ff" opacity=".35"/>`;
   ys.forEach(y=>s+=line(x0,y,x1,y));
   s+=line(x0,classY,x1,classY,'#aebbd0',1.6,'stroke-dasharray="5 6"');
+  // Match the upper 4-qubit circuit: barrier only BETWEEN stages (never before H).
+  // Use exactly the same step names, type weight, and centered label alignment.
+  const boundaries=[110,...diagram.sections.slice(1).map(sec=>sec.startX-54),diagram.totalWidth-36];
+  for(let i=1;i<boundaries.length-1;i++){
+    const barX=boundaries[i];
+    if(barX>=x0-20&&barX<=x1+20)s+=line(barX,75,barX,ys.at(-1)+24,'#4f5a6d',2.2,'stroke-dasharray="14 11"');
+  }
   for(const sec of diagram.sections){
-    const barX=sec.startX-54;
-    if(barX>=x0-20&&barX<=x1+20)s+=line(barX,75,barX,ys.at(-1)+24,'#64718a',2.4,'stroke-dasharray="12 10"');
-    if(sec.startX+38>=x0-200&&sec.startX+38<=x1+200)s+=text(sec.startX+8,44,sec.name,20,'#334b74',900,'start');
+    const start=Math.max(boundaries[sec.index]+9,x0+10),end=Math.min(boundaries[sec.index+1]-9,x1-10);
+    // Long stages remain labeled in the center of the visible section while panning.
+    // Skip when the visible slice is narrower than its title, instead of overlapping a barrier.
+    const minLabelWidth=sec.index===1?248:sec.index===2?190:155;
+    if(end-start>=minLabelWidth){
+      s+=text((start+end)/2,44,sec.name,22,'#475873',850,'middle');
+    }
   }
   // Gate positions are ordered; binary search directly to the part in view.
   let lo=0,hi=diagram.gates.length;
@@ -690,14 +701,18 @@ function drawAdvancedWindow(){
     else if(g.type==='MCX'||g.type==='CCX'){graphic=controlled(x,g.controls,g.target);tip=`${g.type} · ${g.controls.length}개 제어가 모두 1일 때 타깃을 뒤집습니다.`;}
     else if(g.type==='CX'){graphic=controlled(x,[g.a],g.target);tip='CX · Controlled X';}
     else if(g.type==='SWAP'){graphic=line(x,ys[g.a],x,ys[g.b],'#5275c9',2.4)+cross(x,ys[g.a])+cross(x,ys[g.b]);tip='SWAP · 두 큐비트 교환';}
-    else if(g.type==='CP'){graphic=line(x,ys[g.a],x,ys[g.b],'#3999ce',2.2)+dot(x,ys[g.a])+rectGate(x,ys[g.b],'P','#38baff',47)+text(x,ys[g.b]+35,`−π/${g.divisor}`,13,'#365e9d',780);tip=`CP · controlled phase (−π/${g.divisor})`;}
+    else if(g.type==='CP'){
+      const y=ys[g.b], angle=`−π/${g.divisor}`;
+      graphic=line(x,ys[g.a],x,y,'#3c78be',2.2)+dot(x,ys[g.a])+`<rect x="${x-30}" y="${y-23}" width="60" height="46" rx="4" fill="#38baff" stroke="#38baff"/>`+text(x,y-9,'P',18,'#0c2348',800)+text(x,y+10,angle,11,'#0c2348',800);
+      tip=`CP · controlled phase (${angle})`;
+    }
     else if(g.type==='MEASURE'){graphic=`<rect x="${x-22}" y="${ys[g.q]-22}" width="44" height="44" rx="4" fill="#d5dae4" stroke="#98a3b7"/><path d="M${x-14},${ys[g.q]+10} A18,18 0 0 1 ${x+14},${ys[g.q]+10} M${x},${ys[g.q]+9} L${x+10},${ys[g.q]-8}" fill="none" stroke="#445066" stroke-width="2"/>${line(x,ys[g.q]+22,x,classY,'#9aa5b9',1.5,'stroke-dasharray="4 4"')}`;tip='Measurement · 고전 비트 읽기';}
     s+=`<g>${graphic}<title>${tip}</title></g>`;
   }
   // Fixed qubit labels at the LEFT EDGE of the visible viewport.
   s+=`<rect x="${x0}" y="66" width="110" height="${classY-42}" fill="#fcfdff" opacity=".97"/>`;
   for(let q=0;q<diagram.total;q++){
-    const name=q<diagram.count?`c[${q}]`:q<diagram.count+diagram.work?`w[${q-diagram.count}]`:`anc[${q-diagram.count-diagram.work}]`;
+    const name=`q[${q}]`;
     s+=text(x0+84,ys[q],name,16,'#4c5e77',800,'end')+line(x0+94,ys[q],x0+110,ys[q]);
   }
   s+=text(x0+84,classY,'out',14,'#536681',800,'end');
@@ -718,7 +733,7 @@ function renderContinuousAdvanced(){
   $('#general-stage-tabs').innerHTML=d.sections.map(section=>`<button type="button" class="advanced-stage" data-section="${section.index}" aria-pressed="false">${section.name}</button>`).join('');
   for(const button of $('#general-stage-tabs').querySelectorAll('button'))button.addEventListener('click',()=>{
     const section=d.sections[Number(button.dataset.section)];
-    scroller.scrollTo({left:Math.max(0,section.startX-175),behavior:'auto'});
+    scroller.scrollTo({left:section.index===0?0:Math.max(0,section.startX-175),behavior:'auto'});
   });
   scroller.scrollLeft=0;
   drawAdvancedWindow();
