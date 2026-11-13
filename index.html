@@ -35,6 +35,25 @@ button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus
 @media(max-width:780px){.shell{padding:0 14px 30px}.topbar-inner{padding:13px 15px}.hero{padding:25px 2px 22px}.hero-mark{display:none}.panel-hd{padding:18px}.section{padding:20px 16px}.definition-grid{grid-template-columns:1fr}.inline-form{grid-template-columns:1fr 1fr}.inline-form .button{grid-column:1/-1}.examples{grid-template-columns:repeat(2,1fr)}.results-grid{grid-template-columns:1fr}.math-box{grid-template-columns:1fr}.math-row{border-right:0;border-bottom:1px solid #e1e7f0}.math-row:last-child{border:0}.circuit-shell{min-width:1100px}.module-tag{display:none}}
 @media(max-width:470px){.brand{font-size:16px}.brand small{font-size:9px}.topbar-side{font-size:10px}.brand-symbol{height:37px;width:37px}.hero h1{font-size:30px}.hero p{font-size:14px}.panel-heading{font-size:18px}.section-title{font-size:17px}.chip{font-size:13px}.gate-help{grid-template-columns:1fr}.intro-call .button{width:100%}.examples-title span{display:block;margin-left:0}.gate-help-item{grid-template-columns:60px 1fr}}
 
+
+/* Gate-by-gate advanced circuit navigator */
+.advanced-controls{border:1px solid #dae2ef;background:#f8faff;border-radius:14px;padding:16px;margin:13px 0 12px}
+.advanced-stage-tabs{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}
+.advanced-stage{border:1px solid #ced7e9;background:#fff;border-radius:10px;padding:10px 13px;color:#253a5b;font-size:14px;line-height:1.35;text-align:left;font-weight:850;transition:background .14s,border .14s}
+.advanced-stage small{display:block;color:#61718d;font-size:12px;font-weight:750;margin-top:2px}
+.advanced-stage.selected{border-color:#6a75d8;background:#e9edff;color:#2938ab;box-shadow:0 0 0 1px #7a86e7}
+.advanced-stage:hover{background:#f0f2ff}
+.advanced-mode-row{display:flex;gap:12px;align-items:center;margin-bottom:6px}.advanced-notation{font-size:12px;color:#677790;line-height:1.5;margin-bottom:13px}
+.advanced-ccx{font-size:14px;color:#293e5d;font-weight:750;display:flex;gap:7px;align-items:center;flex-wrap:wrap;cursor:pointer}
+.advanced-ccx input{accent-color:#4b57d9;width:17px;height:17px;cursor:pointer}
+.advanced-ccx span{font-weight:650;color:#65748d}
+.advanced-nav{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.advanced-nav-btn{min-width:138px;padding:10px 13px;border:1px solid #9aa9d9;background:#fff;color:#3d49b2;border-radius:9px;font-weight:850;font-size:14px}
+.advanced-nav-btn:hover:not(:disabled){background:#edf0ff;border-color:#6877d8}
+.advanced-nav-btn:disabled{opacity:.4;cursor:not-allowed}
+#general-page-label{text-align:center;color:#263958;font-weight:800;font-size:14px;flex:1}
+.advanced-detail{color:#445a78;font-size:14px;margin-top:11px;line-height:1.65;border-top:1px solid #e4e9f3;padding-top:10px}
+@media(max-width:650px){.advanced-nav{gap:7px}.advanced-nav-btn{min-width:120px;flex:1}#general-page-label{order:-1;flex-basis:100%}}
 </style>
 
 </head>
@@ -104,8 +123,16 @@ button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus
               </div>
             </div>
             <div class="module">
-              <div class="module-head"><h3>(심화) 재미로 알아보는 실제 쇼어 알고리즘 Quantum Circuit</h3><span class="module-tag" id="general-registers"></span></div><p id="general-caption" class="tiny"></p><div class="circuit-hint"><strong>↔ 긴 회로도 좌우로 드래그해 확인하세요.</strong><em>트랙패드 가로 스크롤 · 모바일 스와이프 · 키보드 ← → 지원</em></div>
-              <div class="circuit-scroll" tabindex="0" role="region" aria-label="심화 회로 - 마우스로 드래그하거나 좌우 방향키로 이동"><div id="general-circuit-render" class="circuit-shell"></div></div><div class="result-card" style="margin-top:16px"><div class="result-card-head"><h4>예상 measurement probability</h4><span id="general-probability-tag">order-finding peak view</span></div><p class="tiny">실제 order-finding 회로를 이상적으로 실행했을 때 기대되는 측정 피크를 간단히 보여줍니다.</p><div id="general-probability-render"></div><p id="general-probability-description" class="small-caption"></p></div>
+              <div class="module-head"><h3>(심화) 재미로 알아보는 실제 쇼어 알고리즘 Quantum Circuit</h3><span class="module-tag" id="general-registers"></span></div><p id="general-caption" class="tiny"></p>
+              <div id="general-controls" class="advanced-controls" hidden>
+                <div id="general-stage-tabs" class="advanced-stage-tabs" aria-label="회로 단계 선택"></div>
+                <div class="advanced-mode-row"><label class="advanced-ccx"><input type="checkbox" id="general-ccx-expand"> 다중 제어 X(MCX)를 Toffoli(CCX) 게이트까지 분해 <span>· 보조 큐비트 사용</span></label></div>
+                <div class="advanced-notation">MCX·CCX는 논리 게이트입니다. 실제 하드웨어에서는 CNOT 및 단일 큐비트 게이트로 더 분해됩니다.</div>
+                <div class="advanced-nav"><button type="button" id="general-prev" class="advanced-nav-btn">← 이전 게이트</button><span id="general-page-label" aria-live="polite"></span><button type="button" id="general-next" class="advanced-nav-btn">다음 게이트 →</button></div>
+                <div id="general-detail" class="advanced-detail"></div>
+              </div>
+              <div class="circuit-hint"><strong>↔ 회로를 드래그하고, 위 버튼으로 모든 게이트를 순서대로 확인하세요.</strong><em>트랙패드 가로 스크롤 · 모바일 스와이프 · 키보드 ← → 지원</em></div>
+              <div class="circuit-scroll" tabindex="0" role="region" aria-label="심화 회로 - 마우스로 드래그하거나 좌우 방향키로 이동"><div id="general-circuit-render" class="circuit-shell"></div></div><div class="result-card" style="margin-top:16px"><div class="result-card-head"><h4>예상 measurement probability</h4><span id="general-probability-tag">order-finding outcomes</span></div><p class="tiny">제어 모듈러 곱셈과 역 QFT에 대응하는 이상적 측정 확률을 계산합니다.</p><div id="general-probability-render"></div><p id="general-probability-description" class="small-caption"></p></div>
             </div>
           </div>
           
@@ -368,58 +395,239 @@ function sphereSvg(probabilities,bits){
 
 
 
-function generalCircuitSvg(d){
-  const nBits=Math.ceil(Math.log2(d.n)), countBits=2*nBits, total=countBits+nBits;
-  const gap=28, topY=110, ys=Array.from({length:total},(_,i)=>topY+i*gap), H=ys.at(-1)+92, W=2320;
-  const line=(x1,y1,x2,y2,color='#b8c3d6',width=2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${width}"/>`;
-  const txt=(x,y,label,size=18,color='#243650',weight=700,anchor='middle')=>`<text x="${x}" y="${y}" font-size="${size}" fill="${color}" font-weight="${weight}" text-anchor="${anchor}" dominant-baseline="middle">${label}</text>`;
-  const gate=(x,y,label,fill='#ff5363',w=42,h=44)=>`<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="4" fill="${fill}" stroke="${fill}"/>${txt(x,y,label,20,'#10192a',800)}`;
-  const meas=(x,y)=>`<rect x="${x-23}" y="${y-23}" width="46" height="46" rx="4" fill="#d7d9df" stroke="#a7adb8"/><path d="M${x-14},${y+8} A18,18 0 0 1 ${x+14},${y+8}" fill="none" stroke="#455368" stroke-width="2.1"/><circle cx="${x}" cy="${y+8}" r="3.2" fill="#3e4b5e"/>${line(x,y+6,x+9,y-10,'#455368',2.2)}<line x1="${x}" y1="${y+24}" x2="${x}" y2="${H-24}" stroke="#8390a4" stroke-dasharray="4 5" stroke-width="1.6"/>`;
-  const barrier=x=>`<line x1="${x}" y1="78" x2="${x}" y2="${H-54}" stroke="#4f5a6d" stroke-width="2" stroke-dasharray="14 11"/>`;
-  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="실제 쇼어 알고리즘 order-finding 회로의 개략도">`;
-  s+=`<rect width="${W}" height="${H}" rx="12" fill="#fcfdff"/>`;
-  for(let i=0;i<total;i++){
-    s+=line(120,ys[i],2260,ys[i]);
-    const label=i<countBits?`q[${i}]`:`q[${i}]`;
-    s+=txt(50,ys[i],label,17,'#4c5e77',750);
-    s+=txt(94,ys[i]-16,'|0⟩',12,'#64758e',650);
+// Gate-level circuit synthesis for the four classroom examples.
+// The multiplication permutation is exact for all |y>, 0 <= y < 2^n:
+//    y < N -> (b*y) mod N; y >= N -> y.
+// It is decomposed into controlled adjacent-basis transpositions using X and MCX.
+let generalModel=null, generalStageIndex=0, generalPageIndex=0, generalExpandCCX=false;
+const ADV_GATES_PER_PAGE=20;
+
+function basisSwapEdges(start,finish,width){
+  const forward=[];let position=start;
+  for(let bit=0;bit<width;bit++) if((start^finish)&(1<<bit)){
+    const next=position^(1<<bit);forward.push({basis:position,target:bit});position=next;
   }
-  s+=txt(230,52,'01  HADAMARD',22,'#475873',850)+txt(830,52,'02  MODULAR EXPONENTIATION',22,'#475873',850)+txt(1555,52,'03  INVERSE QFT',22,'#475873',850)+txt(2060,52,'04  MEASURE',22,'#475873',850);
-  for(let i=0;i<countBits;i++) s+=gate(220,ys[i],'H');
-  s+=gate(220,ys[countBits+nBits-1],'X','#38baff');
-  s+=barrier(320);
-  const bx=700, by=ys[countBits]-24, bh=(ys[total-1]-ys[countBits])+48;
-  s+=`<rect x="${bx}" y="${by}" width="470" height="${bh}" rx="14" fill="#efeaff" stroke="#cfcef6" stroke-width="2"/>`;
-  s+=txt(bx+235,by+28,'Controlled modular exponentiation',22,'#5646b9',850)+txt(bx+235,by+58,`|x⟩|1⟩ → |x⟩|a^x mod N⟩`,18,'#4c4bb5',760)+txt(bx+235,by+87,`example: N=${d.n}, a=${d.a}`,17,'#4c4bb5',760);
-  for(let i=0;i<countBits;i++){
-    const x=560,y=ys[i];
-    s+=`<circle cx="${x}" cy="${y}" r="6" fill="#074eb2"/>`+line(x,y,bx,ys[countBits]-18,'#1556ba',2.1);
+  if(position!==finish)throw Error('Gray path synthesis error');
+  return forward.concat(forward.slice(0,-1).reverse().map(e=>({...e})));
+}
+function modularStage(n,a,width,count,k,b){
+  const dim=1<<width,perm=Array.from({length:dim},(_,y)=>y<n?(b*y)%n:y);
+  const visited=new Uint8Array(dim),gates=[];
+  let mask=0,cycles=0,swaps=0;
+  for(let start=0;start<dim;start++){
+    if(visited[start])continue;
+    const cycle=[];let y=start;
+    while(!visited[y]){visited[y]=1;cycle.push(y);y=perm[y];}
+    if(y!==start)throw Error('Modular multiplication is not a permutation.');
+    if(cycle.length===1)continue;
+    cycles++;
+    for(let c=1;c<cycle.length;c++){
+      swaps++;
+      for(const edge of basisSwapEdges(cycle[0],cycle[c],width)){
+        const t=edge.target;
+        const desired=((1<<width)-1)^edge.basis;
+        const requiredMask=desired&~(1<<t);
+        const diff=mask^requiredMask;
+        for(let q=0;q<width;q++)if(diff&(1<<q)){
+          gates.push({type:'X',q:count+q});mask^=1<<q;
+        }
+        gates.push({type:'MCX', controls:[k,...Array.from({length:width},(_,q)=>count+q).filter(q=>q!==count+t)],target:count+t});
+      }
+    }
   }
-  s+=barrier(1240);
-  s+=`<rect x="1430" y="${ys[0]-28}" width="230" height="${(ys[countBits-1]-ys[0])+56}" rx="14" fill="#edf8ff" stroke="#c9e7ff" stroke-width="2"/>`;
-  s+=txt(1545,ys[0]-2,'QFT†',28,'#2c6aa0',850)+txt(1545,ys[0]+28,`on ${countBits} counting qubits`,17,'#2c6aa0',760);
-  s+=barrier(1785);
-  for(let i=0;i<countBits;i++) s+=meas(2060,ys[i]);
-  s+=txt(120,ys[countBits]-26,`counting register: ${countBits} qubits`,14,'#51617a',750,'start');
-  s+=txt(120,ys[total-1]+22,`work register: ${nBits} qubits`,14,'#51617a',750,'start');
-  return s+'</svg>';
+  for(let q=0;q<width;q++)if(mask&(1<<q))gates.push({type:'X',q:count+q});
+  // Exhaustive check: correct behavior for every work basis value,
+  // both when the external control is 0 and when it is 1.
+  for(let control=0;control<=1;control++)for(let y0=0;y0<dim;y0++){
+    let state=y0;
+    for(const g of gates){
+      if(g.type==='X')state^=1<<(g.q-count);
+      else if(control&&((state&(((1<<width)-1)^(1<<(g.target-count))))===(((1<<width)-1)^(1<<(g.target-count)))))state^=1<<(g.target-count);
+    }
+    if(state!==(control?perm[y0]:y0))throw Error(`Permutation verification failed: N=${n}, a=${a}, q=${k}, y=${y0}`);
+  }
+  return {key:`mul-${k}`,name:`02 U^${2**k} · q[${k}] (b=${b})`,description:`q[${k}]가 1일 때 |y⟩ → |${b}·y mod ${n}⟩ (y < ${n}), 그 외 기저 상태는 유지`,gates,cycles,swaps,b,perm,k};
 }
-function generalPeaks(d){
-  const nBits=Math.ceil(Math.log2(d.n)), countBits=2*nBits, Q=2**countBits, r=d.r;
-  const peaks=[];
-  for(let s=0;s<r;s++) peaks.push({state:Math.round(s*Q/r)%Q, probability:1/r});
-  return {countBits,Q,r,peaks};
+function makeAdvancedModel(n,a){
+  if(gcd(n,a)!==1)throw Error('서로소인 N, a만 모듈러 곱셈 유니터리를 만들 수 있습니다.');
+  const width=Math.ceil(Math.log2(n)),count=width*2,ancillas=Math.max(0,width-2);
+  const stages=[{key:'init',name:'01 중첩 준비',description:`counting ${count}개에 H, work의 맨 낮은 비트에 X를 적용하여 |1⟩ 준비`,gates:[...Array.from({length:count},(_,q)=>({type:'H',q})),{type:'X',q:count}]}];
+  let b=a%n;
+  const multipliers=Array.from({length:count},()=>null);
+  for(let k=0;k<count;k++){
+    if(b!==1){
+      const item=modularStage(n,a,width,count,k,b);
+      multipliers[k]=item.perm;
+      stages.push(item);
+    }
+    b=(b*b)%n;
+  }
+  const qft=[];
+  for(let i=0;i<Math.floor(count/2);i++)qft.push({type:'SWAP',a:i,b:count-1-i});
+  for(let j=0;j<count;j++){
+    for(let m=0;m<j;m++)qft.push({type:'CP',a:m,b:j,divisor:1<<(j-m),angle:-Math.PI/(1<<(j-m))});
+    qft.push({type:'H',q:j});
+  }
+  stages.push({key:'qft',name:'03 역 QFT†',description:`SWAP ${Math.floor(count/2)}개 + 제어 위상 ${count*(count-1)/2}개 + H ${count}개`,gates:qft});
+  stages.push({key:'measure',name:'04 측정',description:'counting register만 측정',gates:Array.from({length:count},(_,q)=>({type:'MEASURE',q}))});
+  return {n,a,width,count,ancillas,stages,multipliers};
 }
-function sparseProbabilitySvg(summary){
-  const peaks=summary.peaks, bits=summary.countBits, W=980,H=420,l=90,r=30,top=44,bot=74,pw=W-l-r,ph=H-top-bot;
-  const ymax=Math.max(.3,...peaks.map(p=>p.probability*1.2)), y=p=>top+ph*(1-p/ymax);
-  const barSpacing=pw/peaks.length, barWidth=Math.min(120,barSpacing*.46);
-  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="실제 쇼어 회로의 예상 측정 확률 피크" xmlns="http://www.w3.org/2000/svg"><rect x="${l}" y="${top}" width="${pw}" height="${ph}" fill="#fff" stroke="#41506a" stroke-width="1.5"/>`;
-  for(let t=0;t<=5;t++){const p=ymax*t/5; s+=`<line x1="${l}" y1="${y(p)}" x2="${W-r}" y2="${y(p)}" stroke="#e3e8f0" stroke-width="1"/><text x="${l-14}" y="${y(p)+5}" text-anchor="end" font-size="14" fill="#213147">${p.toFixed(2)}</text>`;}
-  peaks.forEach((peak,i)=>{const x=l+barSpacing*(i+.5),h=top+ph-y(peak.probability); s+=`<rect x="${x-barWidth/2}" y="${y(peak.probability)}" width="${barWidth}" height="${h}" rx="10" fill="#5a6ae6" opacity=".9"/><text x="${x}" y="${y(peak.probability)-10}" text-anchor="middle" font-size="15" fill="#273754" font-weight="800">${(peak.probability*100).toFixed(0)}%</text><text x="${x}" y="${H-48}" text-anchor="middle" font-size="15" fill="#16253d" font-weight="700">${asBinary(peak.state,bits)}</text><text x="${x}" y="${H-26}" text-anchor="middle" font-size="13" fill="#53657f">${peak.state}</text>`;});
-  s+=`<text x="${W/2}" y="${H-6}" text-anchor="middle" font-size="18" font-weight="800" fill="#16253d">measured counting state</text><text x="24" y="${top+ph/2}" transform="rotate(-90 24 ${top+ph/2})" text-anchor="middle" font-size="18" font-weight="800" fill="#16253d">probability</text>`;
-  return s+'</svg>';
+function expandToCCX(gates,ancillaStart){
+  const result=[];
+  for(const g of gates){
+    if(g.type!=='MCX'){result.push(g);continue;}
+    const c=g.controls,m=c.length;
+    if(m===1){result.push({type:'CX',a:c[0],target:g.target});continue;}
+    if(m===2){result.push({type:'CCX',controls:c,target:g.target});continue;}
+    const aux=Array.from({length:m-2},(_,i)=>ancillaStart+i);
+    result.push({type:'CCX',controls:[c[0],c[1]],target:aux[0]});
+    for(let i=2;i<=m-2;i++)result.push({type:'CCX',controls:[c[i],aux[i-2]],target:aux[i-1]});
+    result.push({type:'CCX',controls:[c[m-1],aux[m-3]],target:g.target});
+    for(let i=m-2;i>=2;i--)result.push({type:'CCX',controls:[c[i],aux[i-2]],target:aux[i-1]});
+    result.push({type:'CCX',controls:[c[0],c[1]],target:aux[0]});
+  }
+  return result;
 }
+function advancedStageGates(stage){
+  return generalExpandCCX?expandToCCX(stage.gates,generalModel.count+generalModel.width):stage.gates;
+}
+
+// This computes the ideal distribution from the exact controlled multiplications,
+// not by inserting r or assuming equally weighted peaks.
+function fftForward(re,im){
+  const N=re.length;
+  for(let i=1,j=0;i<N;i++){
+    let bit=N>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;
+    if(i<j){[re[i],re[j]]=[re[j],re[i]];[im[i],im[j]]=[im[j],im[i]];}
+  }
+  for(let len=2;len<=N;len<<=1){
+    const angle=-2*Math.PI/len,c=Math.cos(angle),s=Math.sin(angle);
+    for(let start=0;start<N;start+=len){
+      let wr=1,wi=0;
+      for(let j=0;j<(len>>1);j++){
+        const u=start+j,v=u+(len>>1);
+        const tr=wr*re[v]-wi*im[v],ti=wr*im[v]+wi*re[v];
+        re[v]=re[u]-tr;im[v]=im[u]-ti;re[u]+=tr;im[u]+=ti;
+        const nw=wr*c-wi*s;wi=wr*s+wi*c;wr=nw;
+      }
+    }
+  }
+}
+function generalMeasurementStats(model){
+  const Q=1<<model.count, groups=new Map(),prob=new Float64Array(Q);
+  for(let x=0;x<Q;x++){
+    let y=1;
+    for(let k=0;k<model.count;k++)if(x&(1<<k)){
+      const perm=model.multipliers[k];if(perm)y=perm[y];
+    }
+    if(!groups.has(y))groups.set(y,new Float64Array(Q));
+    groups.get(y)[x]=1;
+  }
+  for(const basisIndicator of groups.values()){
+    const re=basisIndicator,im=new Float64Array(Q);
+    fftForward(re,im);
+    for(let index=0;index<Q;index++)prob[index]+=(re[index]*re[index]+im[index]*im[index])/(Q*Q);
+  }
+  const norm=prob.reduce((s,p)=>s+p,0);
+  if(Math.abs(norm-1)>1e-9)throw Error(`Advanced probability normalization failed: ${norm}`);
+  const peaks=Array.from(prob,(p,state)=>({state,probability:p})).filter(item=>item.probability>1e-8);
+  const display=peaks.length<=18?peaks:peaks.slice().sort((a,b)=>b.probability-a.probability).slice(0,18).sort((a,b)=>a.state-b.state);
+  return {countBits:model.count,Q,peaks:display,nonzero:peaks.length,displayProbability:display.reduce((s,p)=>s+p.probability,0),norm};
+}
+function gateLevelSvg(model,stage,allGates,from,to){
+  const visible=allGates.slice(from,to),width=model.count+model.width+(generalExpandCCX?model.ancillas:0);
+  const horizontal=92,left=156,W=Math.max(1950,left+visible.length*horizontal+155);
+  const y0=118,space=36,ys=Array.from({length:width},(_,i)=>y0+i*space),classY=ys.at(-1)+58,H=classY+70;
+  const line=(x1,y1,x2,y2,color='#9baac3',w=1.7,more='')=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${w}" ${more}/>`;
+  const label=(x,y,s,size=17,fg='#20344f',weight=700,anchor='middle')=>`<text x="${x}" y="${y}" fill="${fg}" font-size="${size}" font-weight="${weight}" text-anchor="${anchor}" dominant-baseline="middle">${s}</text>`;
+  const rectGate=(x,y,text,fill='#ff5363',size=42)=>`<rect x="${x-size/2}" y="${y-size/2}" width="${size}" height="${size}" rx="4" fill="${fill}" stroke="${fill}"/>${label(x,y,text,19,'#0b1c35',850)}`;
+  const dot=(x,y)=>`<circle cx="${x}" cy="${y}" r="6.2" fill="#0754b7"/>`;
+  const target=(x,y)=>`<circle cx="${x}" cy="${y}" r="19" fill="#074db1"/><path d="M${x-13},${y} H${x+13} M${x},${y-13} V${y+13}" stroke="#fff" stroke-width="2.5"/>`;
+  const cross=(x,y)=>`<path d="M${x-10},${y-10} L${x+10},${y+10} M${x+10},${y-10} L${x-10},${y+10}" fill="none" stroke="#5374c8" stroke-width="3"/>`;
+  const ctrl=(x,c,targetQ)=>{
+    const points=[...c,targetQ].map(q=>ys[q]);
+    return line(x,Math.min(...points),x,Math.max(...points),'#245db4',2.15)+c.map(q=>dot(x,ys[q])).join('')+target(x,ys[targetQ]);
+  };
+  const meas=(x,y,q)=>`<rect x="${x-22}" y="${y-22}" width="44" height="44" rx="4" fill="#d5dae4" stroke="#98a3b7"/>`+`<path d="M${x-14},${y+10} A18,18 0 0 1 ${x+14},${y+10} M${x},${y+9} L${x+10},${y-8}" fill="none" stroke="#445066" stroke-width="2"/>`+line(x,y+22,x,classY,'#9aa5b9',1.6,'stroke-dasharray="4 4"')+label(x,classY+16,String(q),14,'#536681',750);
+  let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${stage.name}, ${from+1}번째부터 ${to}번째까지, 실제 양자 게이트를 나열한 회로">`;
+  s+=`<rect width="${W}" height="${H}" fill="#fcfdff" rx="12"/>`;
+  s+=`<rect x="125" y="${ys[0]-23}" width="${W-165}" height="${ys[model.count-1]-ys[0]+46}" fill="#eef4ff" opacity=".38" rx="8"/>`;
+  for(let q=0;q<width;q++){
+    const y=ys[q];s+=line(126,y,W-35,y,'#aab8cc',1.7);
+    const textQ=q<model.count?`c[${q}]`:q<model.count+model.width?`w[${q-model.count}]`:`anc[${q-model.count-model.width}]`;
+    s+=label(76,y,textQ,q<model.count?16:15,'#4b5f7c',750,'end');
+  }
+  s+=line(126,classY,W-35,classY,'#aab8cc',1.5,'stroke-dasharray="6 5"')+label(76,classY,'out',15,'#51617c',700,'end');
+  s+=label(150,38,stage.name,22,'#304a7e',850,'start')+label(W-55,38,`${from+1}–${to} / ${allGates.length} gates`,18,'#53657e',750,'end');
+  for(let j=0;j<visible.length;j++){
+    const g=visible[j],x=left+(j+.5)*horizontal;
+    s+=line(x,72,x,84,'#cfdae9',1.6);
+    let drawing='',desc='';
+    if(g.type==='H'){drawing=rectGate(x,ys[g.q],'H');desc='Hadamard: 중첩을 생성';}
+    else if(g.type==='X'){drawing=rectGate(x,ys[g.q],'X','#38baff');desc='Pauli X: |0⟩와 |1⟩ 교환';}
+    else if(g.type==='MCX'){drawing=ctrl(x,g.controls,g.target);desc=`MCX (${g.controls.length} control): 모든 제어 비트가 1일 때만 타깃 X 적용`;}
+    else if(g.type==='CX'){drawing=ctrl(x,[g.a],g.target);desc='Controlled-X (CNOT)';}
+    else if(g.type==='CCX'){drawing=ctrl(x,g.controls,g.target);desc='CCX (Toffoli): 두 제어 비트가 모두 1일 때 타깃을 뒤집음';}
+    else if(g.type==='SWAP'){drawing=line(x,ys[g.a],x,ys[g.b],'#5275c9',2.2)+cross(x,ys[g.a])+cross(x,ys[g.b]);desc='SWAP: 두 큐비트 교환';}
+    else if(g.type==='CP'){
+      drawing=line(x,ys[g.a],x,ys[g.b],'#3999ce',2.2)+dot(x,ys[g.a])+rectGate(x,ys[g.b],'P','#38baff',48)+label(x,ys[g.b]+36,`−π/${g.divisor}`,14,'#365e9d',750);
+      desc=`Controlled phase P(−π/${g.divisor}): 상대 위상을 조정`;
+    }else if(g.type==='MEASURE'){drawing=meas(x,ys[g.q],g.q);desc='Measurement: counting qubit를 고전 비트로 측정';}
+    s+=`<g>${drawing}<title>${desc}</title></g>`;
+    if((j+1)%5===0)s+=label(x,85,`${from+j+1}`,13,'#6d7d94',680);
+  }
+  s+='</svg>';
+  return s;
+}
+function updateAdvancedPage(){
+  if(!generalModel)return;
+  const stage=generalModel.stages[generalStageIndex],gates=advancedStageGates(stage);
+  const pages=Math.max(1,Math.ceil(gates.length/ADV_GATES_PER_PAGE));
+  generalPageIndex=Math.max(0,Math.min(pages-1,generalPageIndex));
+  const from=generalPageIndex*ADV_GATES_PER_PAGE,to=Math.min(gates.length,from+ADV_GATES_PER_PAGE);
+  $('#general-circuit-render').innerHTML=gateLevelSvg(generalModel,stage,gates,from,to);
+  $('#general-page-label').textContent=`${stage.name} · ${generalPageIndex+1} / ${pages} 페이지 · 게이트 ${from+1}–${to} / ${gates.length}`;
+  $('#general-detail').textContent=stage.description;
+  $('#general-prev').disabled=generalStageIndex===0&&generalPageIndex===0;
+  $('#general-next').disabled=generalStageIndex===generalModel.stages.length-1&&generalPageIndex===pages-1;
+  $('#general-registers').textContent=`counting ${generalModel.count} + work ${generalModel.width}${generalExpandCCX?' + ancilla '+generalModel.ancillas:''}`;
+  $('#general-stage-tabs').innerHTML=generalModel.stages.map((st,i)=>`<button type="button" class="advanced-stage ${i===generalStageIndex?'selected':''}" data-stage="${i}" aria-pressed="${i===generalStageIndex}">${st.name}<small>${advancedStageGates(st).length} gates</small></button>`).join('');
+  for(const b of $('#general-stage-tabs').querySelectorAll('button'))b.addEventListener('click',()=>{generalStageIndex=+b.dataset.stage;generalPageIndex=0;updateAdvancedPage();});
+  const viewport=$('#general-circuit-render').closest('.circuit-scroll');
+  if(viewport)viewport.scrollLeft=0;
+}
+function shiftAdvancedPage(direction){
+  if(!generalModel)return;
+  const n=Math.ceil(advancedStageGates(generalModel.stages[generalStageIndex]).length/ADV_GATES_PER_PAGE);
+  const next=generalPageIndex+direction;
+  if(next>=0&&next<n){generalPageIndex=next;updateAdvancedPage();return;}
+  const newStage=generalStageIndex+direction;
+  if(newStage<0||newStage>=generalModel.stages.length)return;
+  generalStageIndex=newStage;
+  const count=Math.ceil(advancedStageGates(generalModel.stages[newStage]).length/ADV_GATES_PER_PAGE);
+  generalPageIndex=direction>0?0:count-1;
+  updateAdvancedPage();
+}
+function showGeneralCircuit(d){
+  // The four curated cases are fast enough for full exhaustive permutation tests.
+  if(!EXAMPLES.some(ex=>ex.n===d.n&&ex.a===d.a)){
+    $('#general-caption').innerHTML='심화 게이트 전개는 현재 <b>빠른 예제 네 개</b>에 대해 검증되어 있습니다. 위의 예제 중 하나를 선택해 주세요.';
+    $('#general-circuit-render').innerHTML='';$('#general-probability-render').innerHTML='';$('#general-controls').hidden=true;
+    return;
+  }
+  generalModel=makeAdvancedModel(d.n,d.a);
+  const measured=generalMeasurementStats(generalModel);
+  const gateCount=generalModel.stages.reduce((sum,stage)=>sum+stage.gates.length,0);
+  $('#general-caption').innerHTML=`<b>N=${d.n}, a=${d.a}</b>에서 위수 r을 회로 생성에 미리 입력하지 않습니다. work ${generalModel.width}개의 <b>모든 기저 상태</b>에 대해 모듈러 곱셈을 구현하며, 항등 상태에는 아무 연산도 적용하지 않습니다. 총 <b>${gateCount.toLocaleString()}개의 논리 게이트</b>를 페이지별로 전부 확인할 수 있습니다.`;
+  $('#general-controls').hidden=false;
+  $('#general-ccx-expand').checked=false;
+  generalExpandCCX=false;generalStageIndex=1;generalPageIndex=0;
+  $('#general-probability-tag').textContent=`counting ${generalModel.count} qubits · ideal`;
+  $('#general-probability-render').innerHTML=sparseProbabilitySvg(measured);
+  $('#general-probability-description').textContent=`모듈러 곱셈과 역 QFT에 대응하는 이상적 확률을 계산했습니다. 2^${generalModel.count}=${measured.Q.toLocaleString()}개 측정 상태 중 유의미한 상태 ${measured.nonzero}개이며, 표시 확률의 합은 ${(measured.displayProbability*100).toFixed(2)}%입니다. 이 네 예제의 경우 추정된 각 피크의 확률이 정확히 수렴합니다.`;
+  updateAdvancedPage();
+}
+
 
 function implement(){
   const d=calculate();if(!d)return;
@@ -436,13 +644,7 @@ function implement(){
     $('#probability-render').innerHTML=probabilitySvg(sim);
     $('#probability-description').textContent=d.r===2?'r=2: 000과 100이 각각 50%입니다. 측정값 100₂=4는 4/8=1/2로 위수 2에 대한 정보를 줍니다.':'r=4: 00, 01, 10, 11이 각각 25%입니다. 01₂/4, 11₂/4는 분모 4를 복원하는 데 유용하고, 10₂/4는 약분되면 분모 2만 남습니다.';
     $('#qsphere-render').innerHTML=sphereSvg(sim.probabilities, sim.count);
-    const general=generalPeaks(d);
-    $('#general-registers').textContent=`counting ${general.countBits} + work ${Math.ceil(Math.log2(d.n))}`;
-    $('#general-caption').innerHTML=`위의 4-qubit 압축 회로와 달리, 여기서는 <b>r을 미리 안다고 가정하지 않는</b> 실제 order-finding 회로의 전체 구조를 개략도로 보여줍니다. 현재 예제에서는 N=${d.n}, a=${d.a} 이므로 counting register ${general.countBits}개, work register ${Math.ceil(Math.log2(d.n))}개가 필요합니다.`;
-    $('#general-circuit-render').innerHTML=generalCircuitSvg(d);
-    $('#general-probability-tag').textContent=`${general.countBits}-qubit counting register`;
-    $('#general-probability-render').innerHTML=sparseProbabilitySvg(general);
-    $('#general-probability-description').textContent=`선택한 예제의 실제 위수는 r=${general.r}이므로, 이상적 회로에서는 2^${general.countBits}=${general.Q}개 상태 중 대략 ${general.r}개의 대표 피크가 나타납니다. 아래 그래프는 그 대표 피크만 추려서 보여줍니다.`;
+    showGeneralCircuit(d);
     placeholder.hidden=true;$('#quantum-result').classList.remove('result-hidden');
   }catch(e){placeholder.hidden=false;placeholder.textContent='양자 계산 오류: '+e.message;$('#quantum-result').classList.add('result-hidden');}
 }
@@ -479,6 +681,11 @@ function activateCircuitPanning(){
   }
 }
 activateCircuitPanning();
+$('#general-prev').addEventListener('click',()=>shiftAdvancedPage(-1));
+$('#general-next').addEventListener('click',()=>shiftAdvancedPage(1));
+$('#general-ccx-expand').addEventListener('change',e=>{
+  generalExpandCCX=e.target.checked;generalPageIndex=0;updateAdvancedPage();
+});
 
 renderExamples();
 $('#input-form').addEventListener('submit',e=>{e.preventDefault();calculate();});
